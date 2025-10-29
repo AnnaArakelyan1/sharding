@@ -79,3 +79,13 @@ class DBManager:
         conn.commit()
         conn.close()
         print(f"[INFO] User with id={user_id} deleted from shard_{shard_id}")
+        
+    def update_user(self, user_id: int, new_name: str):
+        shard_id = self._select_shard(user_id)
+        conn = self._get_connection(shard_id)
+        cur = conn.cursor()
+        cur.execute("UPDATE users SET name = ? WHERE id = ?", (new_name, user_id))
+        conn.commit()
+        conn.close()
+        print(f"[INFO] User id={user_id} updated to {new_name} in shard_{shard_id}")
+
