@@ -1,0 +1,60 @@
+
+services:
+  shard1:
+    image: postgres:15
+    container_name: shard1
+    environment:
+      POSTGRES_USER: pguser
+      POSTGRES_PASSWORD: pgpassword
+      POSTGRES_DB: appdb
+    volumes:
+      - ./shard1_data:/var/lib/postgresql/data
+      - ./shard_init:/docker-entrypoint-initdb.d
+    ports:
+      - "5433:5432"
+
+  shard2:
+    image: postgres:15
+    container_name: shard2
+    environment:
+      POSTGRES_USER: pguser
+      POSTGRES_PASSWORD: pgpassword
+      POSTGRES_DB: appdb
+    volumes:
+      - ./shard2_data:/var/lib/postgresql/data
+      - ./shard_init:/docker-entrypoint-initdb.d
+    ports:
+      - "5434:5432"
+
+  shard3:
+    image: postgres:15
+    container_name: shard3
+    environment:
+      POSTGRES_USER: pguser
+      POSTGRES_PASSWORD: pgpassword
+      POSTGRES_DB: appdb
+    volumes:
+      - ./shard3_data:/var/lib/postgresql/data
+      - ./shard_init:/docker-entrypoint-initdb.d
+    ports:
+      - "5435:5432"
+
+  router:
+    build: ./router
+    container_name: router
+    environment:
+      SHARD1_HOST: shard1
+      SHARD1_PORT: 5432
+      SHARD2_HOST: shard2
+      SHARD2_PORT: 5432
+      SHARD3_HOST: shard3
+      SHARD3_PORT: 5432
+      DB_USER: pguser
+      DB_PASS: pgpassword
+      DB_NAME: appdb
+    ports:
+      - "5000:5000"
+    depends_on:
+      - shard1
+      - shard2
+      - shard3
